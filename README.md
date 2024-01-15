@@ -4,6 +4,7 @@
 
 In order to overcome this, create two .env files named .env.test and .env.development
 
-In the .env.test file, write 'PGDATABASE=nc_news_test'
+In the .env.test file, write 'PGDATABASE=XXXXX'
+In the .env.development file, write 'PGDATABASE=XXXXX'
 
-In the .env.development file, write 'PGDATABASE=nc_news'
+The names of each database can be found in '/db/setup.sql' and you can replace 'XXXXX' in the lines above with the names of the database.
