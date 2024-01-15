@@ -90,16 +90,36 @@ describe("GET /api", () => {
                     "description": "serves an array of all users",
                     "queries": [],
                     "exampleResponse": {
-                      "articles": [
-                        {
-                          "username": "butter_bridge",
-                          "name": "jonny",
-                          "avatar_url":
-                            "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
-                        }
-                      ]
+                        "articles": [
+                            {
+                                "username": "butter_bridge",
+                                "name": "jonny",
+                                "avatar_url":
+                                    "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
+                            }
+                        ]
                     }
-                  })
+                })
             })
     })
-})
+});
+
+describe("GET /api/articles/:article_id", () => {
+    test("responds with a status code: 200 and sends a single article to the client", () => {
+        return request(app).get("/api/articles/1").expect(200)
+            .then(({ body }) => {
+                const { article } = body;
+                expect(article).toEqual({
+                    article_id: 1,
+                    title: 'Living in the shadow of a great man',
+                    topic: 'mitch',
+                    author: 'butter_bridge',
+                    body: 'I find this existence challenging',
+                    created_at: '2020-07-09T20:11:00.000Z',
+                    votes: 100,
+                    article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
+                  })
+            })
+    });
+});
+
