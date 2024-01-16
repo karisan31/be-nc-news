@@ -160,8 +160,8 @@ describe("GET /api/articles/:article_id/comments", () => {
                 author: 'icellusedkars',
                 votes: 0,
                 created_at: '2020-11-03T21:00:00.000Z'
-              })
-        })
+              });
+        });
     });
     test('responds with an appropriate status: 404 and error message when given a valid but non-existent id', () => {
         return request(app)
