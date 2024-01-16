@@ -23,7 +23,6 @@ module.exports.fetchArticles = () => {
     
     return db.query(queryStr)
         .then(({ rows }) => {
-            console.log(rows)
             return rows;
         })
 }
