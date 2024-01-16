@@ -87,3 +87,45 @@ describe("GET /api/articles/:article_id", () => {
     });
 });
 
+describe("GET /api/articles", () => {
+    test("responds with a status code: 200", () => {
+        return request(app).get("/api/articles").expect(200)
+    })
+    test("respond with an array of articles objects each with the following properties: author, title, article_id, topic, created_at, votes, article_img_url, comment_count AND have its body propery removed", () => {
+        return request(app)
+            .get("/api/articles")
+            .then(({ body }) => {
+                const { articles } = body;
+                expect(Array.isArray(articles)).toBe(true);
+                expect(articles.length).toBe(13)
+                articles.forEach((article) => {
+                    expect(article.hasOwnProperty('author')).toBe(true)
+                    expect(article.hasOwnProperty('title')).toBe(true)
+                    expect(article.hasOwnProperty('article_id')).toBe(true)
+                    expect(article.hasOwnProperty('topic')).toBe(true)
+                    expect(article.hasOwnProperty('created_at')).toBe(true)
+                    expect(article.hasOwnProperty('votes')).toBe(true)
+                    expect(article.hasOwnProperty('article_img_url')).toBe(true)
+                    expect(article.hasOwnProperty('comment_count')).toBe(true)
+                    expect(article.hasOwnProperty('body')).toBe(false)
+                })
+                expect(articles[0].author).toBe("icellusedkars")
+                expect(articles[0].title).toBe("Eight pug gifs that remind me of mitch")
+                expect(articles[0].article_id).toBe(3)
+                expect(articles[0].topic).toBe("mitch")
+                expect(articles[0].created_at).toBe("2020-11-03T09:12:00.000Z")
+                expect(articles[0].votes).toBe(0)
+                expect(articles[0].article_img_url).toBe("https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700")
+                expect(articles[0].comment_count).toBe('2')
+            });
+    });
+    test('should return articles in correct order by date in descending order', () => {
+        return request(app)
+        .get("/api/articles")
+        .then(({body}) => {
+            expect(body.articles).toBeSortedBy('created_at', {descending: true})
+            expect(body.articles[12].created_at).toBe("2020-01-07T14:08:00.000Z")
+        })
+    });
+});
+
