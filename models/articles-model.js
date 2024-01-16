@@ -7,8 +7,8 @@ module.exports.fetchArticleById = (article_id) => {
                 return Promise.reject({ msg: "Article Does Not Exist"})
             }
             return rows[0];
-        })
-}
+        });
+};
 
 module.exports.fetchArticles = () => {
     
@@ -24,5 +24,21 @@ module.exports.fetchArticles = () => {
     return db.query(queryStr)
         .then(({ rows }) => {
             return rows;
-        })
-}
+        });
+};
+
+module.exports.fetchCommentsByArticleId = (article_id) => {
+
+    const queryStr = `
+        SELECT * FROM comments WHERE comments.article_id = $1
+        ORDER BY created_at desc
+    `
+
+    return db.query(queryStr, [article_id])
+        .then(({ rows }) => {
+            if(rows.length === 0) {
+                return Promise.reject({ msg: "Article Does Not Exist"})
+            }
+            return rows;
+        });
+};
