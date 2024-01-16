@@ -51,8 +51,10 @@ describe("GET /api", () => {
 });
 
 describe("GET /api/articles/:article_id", () => {
-    test("responds with a status code: 200 and sends a single article to the client", () => {
-        return request(app).get("/api/articles/1").expect(200)
+    test("responds with a status code: 200 and sends a single article to the client if article_id is valid", () => {
+        return request(app)
+            .get("/api/articles/1")
+            .expect(200)
             .then(({ body }) => {
                 const { article } = body;
                 expect(article).toEqual({
@@ -64,8 +66,24 @@ describe("GET /api/articles/:article_id", () => {
                     created_at: '2020-07-09T20:11:00.000Z',
                     votes: 100,
                     article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
-                  })
+                })
             })
+    });
+    test('responds with an appropriate status: 404 and error message when given a valid but non-existent id', () => {
+        return request(app)
+            .get('/api/articles/999')
+            .expect(404)
+            .then((response) => {
+                expect(response.body.msg).toBe('Article Does Not Exist');
+            });
+    });
+    test('responds with an appropriate status: 400 and error message when given an invalid id', () => {
+        return request(app)
+            .get('/api/articles/not-an-article')
+            .expect(400)
+            .then((response) => {
+                expect(response.body.msg).toBe('Bad Request');
+            });
     });
 });
 
