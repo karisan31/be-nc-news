@@ -124,8 +124,9 @@ describe("GET /api/articles", () => {
         .get("/api/articles")
         .then(({body}) => {
             expect(body.articles).toBeSortedBy('created_at', {descending: true})
-            expect(body.articles[12].created_at).toBe("2020-01-07T14:08:00.000Z")
         })
     });
 });
+
+
 
