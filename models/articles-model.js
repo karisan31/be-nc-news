@@ -42,3 +42,20 @@ module.exports.fetchCommentsByArticleId = (article_id) => {
             return rows;
         });
 };
+
+module.exports.insertCommentById = (newComment, articleIdOfComment) => {
+    const { body, username } = newComment;
+    const { article_id } = articleIdOfComment;
+
+    return db
+      .query(
+        `INSERT INTO comments (body, author, article_id, votes, created_at) VALUES ($1, $2, $3, 0, NOW()) RETURNING *`,
+        [body, username, article_id]
+      )
+      .then(({ rows }) => {
+        if (rows.length === 0) {
+          return Promise.reject({ message: "Not Found"})
+        }
+        return rows[0];
+      });
+  };

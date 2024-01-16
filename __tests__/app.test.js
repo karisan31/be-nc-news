@@ -147,7 +147,7 @@ describe("GET /api/articles/:article_id/comments", () => {
                 })
             })
     });
-    test('should return articles in correct order by date in descending order', () => {
+    test('should return comments in correct order by date in descending order', () => {
         return request(app)
         .get("/api/articles/1/comments")
         .then(({ body }) => {
@@ -181,3 +181,24 @@ describe("GET /api/articles/:article_id/comments", () => {
     });
 });
 
+describe("POST /api/articles/:article_id/comments", () => {
+    test("inserts a new comment into the database and sends the new comment back to the database", () => {
+        const newComment = {
+            username: 'lurker',
+            body: "I hate POST requests"
+        }
+        return request(app)
+            .post("/api/articles/6/comments")
+            .send(newComment)
+            .expect(201)
+            .then(({ body }) => {
+                const { comment } = body;
+                const currentTime = new Date()
+                expect(comment.comment_id).toBe(19);
+                expect(comment.body).toBe('I hate POST requests');
+                expect(comment.article_id).toBe(6);
+                expect(comment.author).toBe('lurker');
+                expect(comment.votes).toBe(0);
+            })
+    });
+});
