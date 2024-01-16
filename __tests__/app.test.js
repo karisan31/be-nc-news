@@ -128,5 +128,56 @@ describe("GET /api/articles", () => {
     });
 });
 
-
+describe("GET /api/articles/:article_id/comments", () => {
+    test("responds with a status code: 200 and sends all comments as an array for a single article to the client if article_id is valid", () => {
+        return request(app)
+            .get("/api/articles/1/comments")
+            .expect(200)
+            .then(({ body }) => {
+                const { comments } = body;
+                expect(Array.isArray(comments)).toBe(true);
+                expect(comments.length).toBe(11)
+                comments.forEach((comment) => {
+                    expect(comment.hasOwnProperty('author')).toBe(true)
+                    expect(comment.hasOwnProperty('comment_id')).toBe(true)
+                    expect(comment.hasOwnProperty('created_at')).toBe(true)
+                    expect(comment.hasOwnProperty('votes')).toBe(true)
+                    expect(comment.hasOwnProperty('body')).toBe(true)
+                    expect(comment['article_id']).toBe(1)
+                })
+            })
+    });
+    test('should return articles in correct order by date in descending order', () => {
+        return request(app)
+        .get("/api/articles/1/comments")
+        .then(({ body }) => {
+            const { comments } = body;
+            expect(comments).toBeSortedBy('created_at', {descending: true});
+            expect(comments[0]).toEqual({
+                comment_id: 5,
+                body: 'I hate streaming noses',
+                article_id: 1,
+                author: 'icellusedkars',
+                votes: 0,
+                created_at: '2020-11-03T21:00:00.000Z'
+              })
+        })
+    });
+    test('responds with an appropriate status: 404 and error message when given a valid but non-existent id', () => {
+        return request(app)
+            .get('/api/articles/999/comments')
+            .expect(404)
+            .then((response) => {
+                expect(response.body.msg).toBe('Article Does Not Exist');
+            });
+    });
+    test('responds with an appropriate status: 400 and error message when given an invalid id', () => {
+        return request(app)
+            .get('/api/articles/not-an-article/comments')
+            .expect(400)
+            .then((response) => {
+                expect(response.body.msg).toBe('Bad Request');
+            });
+    });
+});
 
