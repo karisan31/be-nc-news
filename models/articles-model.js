@@ -3,15 +3,15 @@ const db = require("../db/connection");
 module.exports.fetchArticleById = (article_id) => {
     return db.query("SELECT * FROM articles WHERE article_id = $1;", [article_id])
         .then(({ rows }) => {
-            if(rows.length === 0) {
-                return Promise.reject({ msg: "Article Does Not Exist"})
+            if (rows.length === 0) {
+                return Promise.reject({ msg: "Article Does Not Exist" })
             }
             return rows[0];
         });
 };
 
 module.exports.fetchArticles = () => {
-    
+
     const queryStr = `
         SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url,
         COUNT(comments.comment_id) AS comment_count
@@ -20,7 +20,7 @@ module.exports.fetchArticles = () => {
         GROUP BY articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url
         ORDER BY created_at desc
     `
-    
+
     return db.query(queryStr)
         .then(({ rows }) => {
             return rows;
@@ -40,14 +40,14 @@ module.exports.fetchCommentsByArticleId = (article_id) => {
 
     return db.query(queryStr, [article_id])
         .then(({ rows }) => {
-            if(rows.length === 0) {
+            if (rows.length === 0) {
                 return db.query(checkArticleIdExists, [article_id])
                     .then(({ rows }) => {
-                        if (rows.length === 0){
-                            return Promise.reject({ msg: "Article Does Not Exist"})
+                        if (rows.length === 0) {
+                            return Promise.reject({ msg: "Article Does Not Exist" })
                         }
                         return [];
-                    })   
+                    })
             }
             return rows;
         });
@@ -58,14 +58,31 @@ module.exports.insertCommentById = (newComment, articleIdOfComment) => {
     const { article_id } = articleIdOfComment;
 
     return db
-      .query(
-        `INSERT INTO comments (body, author, article_id, votes, created_at) VALUES ($1, $2, $3, 0, NOW()) RETURNING *`,
-        [body, username, article_id]
-      )
-      .then(({ rows }) => {
-        if (rows.length === 0) {
-          return Promise.reject({ message: "Not Found"})
-        }
-        return rows[0];
-      });
-  };
+        .query(
+            `INSERT INTO comments (body, author, article_id, votes, created_at) VALUES ($1, $2, $3, 0, NOW()) RETURNING *`,
+            [body, username, article_id]
+        )
+        .then(({ rows }) => {
+            if (rows.length === 0) {
+                return Promise.reject({ msg: "Article Does Not Exist" })
+            }
+            return rows[0];
+        });
+};
+
+module.exports.updateArticleById = (newVotes, articleId) => {
+    const { inc_votes } = newVotes;
+    const { article_id } = articleId;
+
+    return db
+        .query(
+            `UPDATE articles SET votes = votes + $1 WHERE article_id = $2 RETURNING *`,
+            [inc_votes, article_id]
+        )
+        .then(({ rows }) => {
+            if (rows.length === 0) {
+                return Promise.reject({ msg: "Article Does Not Exist" })
+            }
+            return rows[0];
+        });
+};
