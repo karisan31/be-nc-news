@@ -264,7 +264,7 @@ describe("POST /api/articles/:article_id/comments", () => {
 });
 
 describe("PATCH /api/articles/:article_id", () => {
-    test("responds with a status code: 204 and sends a single updated article to the client if article_id is valid", () => {
+    test("responds with a status code: 200 and sends a single updated article to the client if article_id is valid", () => {
         const newVotes = {
             inc_votes: -100
         }
@@ -285,5 +285,40 @@ describe("PATCH /api/articles/:article_id", () => {
                     article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
                 })
             })
+    });
+    test('responds with an appropriate status: 400 and error message when provided with a bad votes object (NaN)', () => {
+        return request(app)
+            .patch("/api/articles/9")
+            .send({
+                inc_votes: "100 more votes"
+            })
+            .expect(400)
+            .then((response) => {
+                expect(response.body.msg).toBe('Bad Request');
+            });
+    });
+    test('responds with an appropriate status: 404 and error message when given a valid but non-existent id', () => {
+        const newVotes = {
+            inc_votes: -100
+        }
+        return request(app)
+            .patch("/api/articles/999")
+            .send(newVotes)
+            .expect(404)
+            .then((response) => {
+                expect(response.body.msg).toBe('Article Does Not Exist');
+            });
+    });
+    test('responds with an appropriate status: 400 and error message when given an invalid id', () => {
+        const newVotes = {
+            inc_votes: -100
+        }
+        return request(app)
+            .patch("/api/articles/not-an-article")
+            .send(newVotes)
+            .expect(400)
+            .then((response) => {
+                expect(response.body.msg).toBe('Bad Request');
+            });
     });
 });

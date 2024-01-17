@@ -64,7 +64,7 @@ module.exports.insertCommentById = (newComment, articleIdOfComment) => {
         )
         .then(({ rows }) => {
             if (rows.length === 0) {
-                return Promise.reject({ message: "Not Found" })
+                return Promise.reject({ msg: "Article Does Not Exist" })
             }
             return rows[0];
         });
@@ -81,7 +81,7 @@ module.exports.updateArticleById = (newVotes, articleId) => {
         )
         .then(({ rows }) => {
             if (rows.length === 0) {
-                return Promise.reject({ message: "Not Found" })
+                return Promise.reject({ msg: "Article Does Not Exist" })
             }
             return rows[0];
         });
