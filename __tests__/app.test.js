@@ -121,10 +121,10 @@ describe("GET /api/articles", () => {
     });
     test('should return articles in correct order by date in descending order', () => {
         return request(app)
-        .get("/api/articles")
-        .then(({body}) => {
-            expect(body.articles).toBeSortedBy('created_at', {descending: true})
-        })
+            .get("/api/articles")
+            .then(({ body }) => {
+                expect(body.articles).toBeSortedBy('created_at', { descending: true })
+            })
     });
 });
 
@@ -149,19 +149,19 @@ describe("GET /api/articles/:article_id/comments", () => {
     });
     test('should return comments in correct order by date in descending order', () => {
         return request(app)
-        .get("/api/articles/1/comments")
-        .then(({ body }) => {
-            const { comments } = body;
-            expect(comments).toBeSortedBy('created_at', {descending: true});
-            expect(comments[0]).toEqual({
-                comment_id: 5,
-                body: 'I hate streaming noses',
-                article_id: 1,
-                author: 'icellusedkars',
-                votes: 0,
-                created_at: '2020-11-03T21:00:00.000Z'
-              });
-        });
+            .get("/api/articles/1/comments")
+            .then(({ body }) => {
+                const { comments } = body;
+                expect(comments).toBeSortedBy('created_at', { descending: true });
+                expect(comments[0]).toEqual({
+                    comment_id: 5,
+                    body: 'I hate streaming noses',
+                    article_id: 1,
+                    author: 'icellusedkars',
+                    votes: 0,
+                    created_at: '2020-11-03T21:00:00.000Z'
+                });
+            });
     });
     test('responds with an appropriate status: 404 and error message when given a valid but non-existent id', () => {
         return request(app)
@@ -213,13 +213,76 @@ describe("POST /api/articles/:article_id/comments", () => {
     });
     test('responds with an appropriate status: 400 and error message when provided with a bad comment (no username)', () => {
         return request(app)
-          .post("/api/articles/9/comments")
-          .send({
-            body: "I've spent 4 hours on documentation today trying to figure out how to test for the current time and also I cannot add my username in this post request now apparently"
-          })
-          .expect(400)
-          .then((response) => {
-            expect(response.body.msg).toBe('Bad Request');
-          });
-      });
+            .post("/api/articles/9/comments")
+            .send({
+                body: "I've spent 4 hours on documentation today trying to figure out how to test for the current time and also I cannot add my username in this post request now apparently"
+            })
+            .expect(400)
+            .then((response) => {
+                expect(response.body.msg).toBe('Bad Request');
+            });
+    });
+    test('responds with an appropriate status: 404 and error message when given a valid but non-existent id', () => {
+        const newComment = {
+            username: 'lurker',
+            body: "Adding extra tests"
+        }
+        return request(app)
+            .post('/api/articles/999/comments')
+            .send(newComment)
+            .expect(404)
+            .then((response) => {
+                expect(response.body.msg).toBe("Key (article_id)=(999) is not present in table \"articles\".");
+            });
+    });
+    test('responds with an appropriate status: 400 and error message when given an invalid id', () => {
+        const newComment = {
+            username: 'lurker',
+            body: "Adding MORE extra tests"
+        }
+        return request(app)
+            .post('/api/articles/not-an-article/comments')
+            .send(newComment)
+            .expect(400)
+            .then((response) => {
+                expect(response.body.msg).toBe('Bad Request');
+            });
+    });
+    test('responds with an appropriate status: 404 and error message when given a valid but non-existent username', () => {
+        const newComment = {
+            username: 'karisan',
+            body: "Testing if username is non-existent"
+        }
+        return request(app)
+            .post('/api/articles/9/comments')
+            .send(newComment)
+            .expect(404)
+            .then((response) => {
+                expect(response.body.msg).toBe("Key (author)=(karisan) is not present in table \"users\".");
+            });
+    });
+});
+
+describe("PATCH /api/articles/:article_id", () => {
+    xtest("responds with a status code: 200 and sends a single updated article to the client if article_id is valid", () => {
+        const newVotes = {
+            inc_votes: -100
+        }
+        return request(app)
+            .patch("/api/articles/1")
+            .expect(204)
+            .then(({ body }) => {
+                const { article } = body;
+                expect(article).toEqual({
+                    article_id: 1,
+                    title: 'Living in the shadow of a great man',
+                    topic: 'mitch',
+                    author: 'butter_bridge',
+                    body: 'I find this existence challenging',
+                    created_at: '2020-07-09T20:11:00.000Z',
+                    votes: 0,
+                    article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
+                })
+            })
+    });
 });
