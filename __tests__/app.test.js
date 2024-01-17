@@ -264,13 +264,14 @@ describe("POST /api/articles/:article_id/comments", () => {
 });
 
 describe("PATCH /api/articles/:article_id", () => {
-    xtest("responds with a status code: 200 and sends a single updated article to the client if article_id is valid", () => {
+    test("responds with a status code: 204 and sends a single updated article to the client if article_id is valid", () => {
         const newVotes = {
             inc_votes: -100
         }
         return request(app)
             .patch("/api/articles/1")
-            .expect(204)
+            .send(newVotes)
+            .expect(200)
             .then(({ body }) => {
                 const { article } = body;
                 expect(article).toEqual({
