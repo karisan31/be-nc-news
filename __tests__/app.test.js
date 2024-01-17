@@ -322,3 +322,27 @@ describe("PATCH /api/articles/:article_id", () => {
             });
     });
 });
+
+describe("DELETE /api/comments/:comment_id", () => {
+    test("responds with a status code: 204, deletes the specified comment and sends no body back", () => {
+        return request(app)
+            .delete("/api/comments/1")
+            .expect(204)
+    });
+    test('responds with an appropriate status: 404 and error message when given a valid but non-existent id', () => {
+        return request(app)
+            .delete('/api/comments/999')
+            .expect(404)
+            .then((response) => {
+                expect(response.body.msg).toBe("Comment Does Not Exist");
+            });
+    });
+    test('responds with an appropriate status: 400 and error message when given an invalid id', () => {
+        return request(app)
+            .delete('/api/comments/not-a-comment')
+            .expect(400)
+            .then((response) => {
+                expect(response.body.msg).toBe('Bad Request');
+            });
+    });
+});

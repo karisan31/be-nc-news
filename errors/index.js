@@ -8,7 +8,7 @@ exports.handleCustomErrors = (err, req, res, next) => {
 };
 
 exports.handlePsqlErrors = (err, req, res, next) => {
-    if (err.msg === "Article Does Not Exist") {
+    if (err.msg) {
         res.status(404).send({ msg: err.msg })
     }
     else if (err.code === '23503') {
