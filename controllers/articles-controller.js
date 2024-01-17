@@ -43,9 +43,22 @@ module.exports.postCommentByArticleId = (req, res, next) => {
 
     insertCommentById(newComment, articleId)
         .then((comment) => {
-            res.status(201).send({ comment });
+            if (comment) {
+                res.status(201).send({ comment });
+            }
         })
         .catch((err) => {
             next(err)
         })
+};
+
+module.exports.patchArticleById = (req, res, next) => {
+    const { article_id } = req.params;
+    fetchArticleById(article_id)
+        .then((article) => {
+        res.status(200).send({ article })      
+    })
+    .catch((err) => {
+        next(err)
+    })
 };
