@@ -34,10 +34,20 @@ module.exports.fetchCommentsByArticleId = (article_id) => {
         ORDER BY created_at desc
     `
 
+    const checkArticleIdExists = `
+        SELECT * FROM articles WHERE article_id = $1
+    `
+
     return db.query(queryStr, [article_id])
         .then(({ rows }) => {
             if(rows.length === 0) {
-                return Promise.reject({ msg: "Article Does Not Exist"})
+                return db.query(checkArticleIdExists, [article_id])
+                    .then(({ rows }) => {
+                        if (rows.length === 0){
+                            return Promise.reject({ msg: "Article Does Not Exist"})
+                        }
+                        return [];
+                    })   
             }
             return rows;
         });
