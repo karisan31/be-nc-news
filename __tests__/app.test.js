@@ -147,7 +147,7 @@ describe("GET /api/articles/:article_id/comments", () => {
                 })
             })
     });
-    test('should return articles in correct order by date in descending order', () => {
+    test('should return comments in correct order by date in descending order', () => {
         return request(app)
         .get("/api/articles/1/comments")
         .then(({ body }) => {
@@ -179,5 +179,47 @@ describe("GET /api/articles/:article_id/comments", () => {
                 expect(response.body.msg).toBe('Bad Request');
             });
     });
+    test('responds with an appropriate status: 200 and sends an empty array when given a valid id but has no comments', () => {
+        return request(app)
+            .get("/api/articles/2/comments")
+            .expect(200)
+            .then(({ body }) => {
+                const { comments } = body;
+                expect(Array.isArray(comments)).toBe(true);
+                expect(comments.length).toBe(0);
+            });
+    });
 });
 
+describe("POST /api/articles/:article_id/comments", () => {
+    test("inserts a new comment into the database, responds with an appropriate status: 201 and sends the new comment back to the database", () => {
+        const newComment = {
+            username: 'lurker',
+            body: "I hate POST requests"
+        }
+        return request(app)
+            .post("/api/articles/6/comments")
+            .send(newComment)
+            .expect(201)
+            .then(({ body }) => {
+                const { comment } = body;
+                expect(comment.comment_id).toBe(19);
+                expect(comment.body).toBe('I hate POST requests');
+                expect(comment.article_id).toBe(6);
+                expect(comment.author).toBe('lurker');
+                expect(comment.votes).toBe(0);
+                expect(comment.created_at).toEqual(expect.any(String));
+            });
+    });
+    test('responds with an appropriate status: 400 and error message when provided with a bad comment (no username)', () => {
+        return request(app)
+          .post("/api/articles/9/comments")
+          .send({
+            body: "I've spent 4 hours on documentation today trying to figure out how to test for the current time and also I cannot add my username in this post request now apparently"
+          })
+          .expect(400)
+          .then((response) => {
+            expect(response.body.msg).toBe('Bad Request');
+          });
+      });
+});

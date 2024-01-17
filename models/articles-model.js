@@ -34,11 +34,38 @@ module.exports.fetchCommentsByArticleId = (article_id) => {
         ORDER BY created_at desc
     `
 
+    const checkArticleIdExists = `
+        SELECT * FROM articles WHERE article_id = $1
+    `
+
     return db.query(queryStr, [article_id])
         .then(({ rows }) => {
             if(rows.length === 0) {
-                return Promise.reject({ msg: "Article Does Not Exist"})
+                return db.query(checkArticleIdExists, [article_id])
+                    .then(({ rows }) => {
+                        if (rows.length === 0){
+                            return Promise.reject({ msg: "Article Does Not Exist"})
+                        }
+                        return [];
+                    })   
             }
             return rows;
         });
 };
+
+module.exports.insertCommentById = (newComment, articleIdOfComment) => {
+    const { body, username } = newComment;
+    const { article_id } = articleIdOfComment;
+
+    return db
+      .query(
+        `INSERT INTO comments (body, author, article_id, votes, created_at) VALUES ($1, $2, $3, 0, NOW()) RETURNING *`,
+        [body, username, article_id]
+      )
+      .then(({ rows }) => {
+        if (rows.length === 0) {
+          return Promise.reject({ message: "Not Found"})
+        }
+        return rows[0];
+      });
+  };
