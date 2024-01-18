@@ -1,7 +1,21 @@
 const db = require("../db/connection");
 
-module.exports.fetchArticleById = (article_id) => {
-    return db.query("SELECT * FROM articles WHERE article_id = $1;", [article_id])
+module.exports.fetchArticleById = (article_id, includeCommentCount = false) => {
+    const validCommentCountQueries = [false, 'true'];
+    if (!validCommentCountQueries.includes(includeCommentCount)) {
+        return Promise.reject({ msg: 'Invalid Query' })
+    }
+    
+    const queryStr = `
+        SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.body, articles.created_at, articles.votes, articles.article_img_url
+        ${includeCommentCount ? ', COUNT(comments.comment_id) AS comment_count': ''}
+        FROM articles
+        ${includeCommentCount ? 'LEFT JOIN comments ON articles.article_id = comments.article_id' : ''}
+        WHERE articles.article_id = $1
+        GROUP BY articles.author, articles.title, articles.article_id, articles.topic, articles.body, articles.created_at, articles.votes, articles.article_img_url
+    `
+    
+    return db.query(queryStr, [article_id])
         .then(({ rows }) => {
             if (rows.length === 0) {
                 return Promise.reject({ msg: "Article Does Not Exist" })

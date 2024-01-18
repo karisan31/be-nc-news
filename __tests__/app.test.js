@@ -420,12 +420,20 @@ describe("GET /api/articles (topic query)", () => {
     test("responds with a status code: 200 and sends all articles with the topic value specified in the query", () => {
         return request(app)
             .get("/api/articles?topic=mitch")
+            .expect(200)
             .then(({ body }) => {
                 const { articles } = body;
                 expect(Array.isArray(articles)).toBe(true);
                 expect(articles.length).toBe(12)
                 articles.forEach((article) => {
+                    expect(typeof article.author).toBe("string")
+                    expect(typeof article.title).toBe("string")
+                    expect(typeof article.article_id).toBe("number")
                     expect(article).toHaveProperty("topic", "mitch")
+                    expect(typeof article.created_at).toBe("string")
+                    expect(typeof article.votes).toBe("number")
+                    expect(typeof article.article_img_url).toBe("string")
+                    expect(typeof article.comment_count).toBe("string")
                 })
                 expect(articles[0]).toEqual({
                     author: 'icellusedkars',
@@ -442,6 +450,7 @@ describe("GET /api/articles (topic query)", () => {
     test("responds with a status code: 200 and an empty array when given a valid but non-existent topic", () => {
         return request(app)
             .get("/api/articles?topic=karisan")
+            .expect(200)
             .then(({ body }) => {
                 const { articles } = body;
                 expect(Array.isArray(articles)).toBe(true);
@@ -451,6 +460,7 @@ describe("GET /api/articles (topic query)", () => {
     test("responds with a status code: 200 and sends all articles if query is omitted or incorrect", () => {
         return request(app)
             .get("/api/articles?topc=mitch")
+            .expect(200)
             .then(({ body }) => {
                 const { articles } = body;
                 expect(Array.isArray(articles)).toBe(true);
@@ -476,6 +486,72 @@ describe("GET /api/articles (topic query)", () => {
                     article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
                     comment_count: '2'
                 })
+            });
+    });
+});
+
+describe("GET /api/articles/:article_id (comment_count)", () => {
+    test("responds with a status code: 200 and sends a single article to the client without the comment_count property if article_id is valid", () => {
+        return request(app)
+            .get("/api/articles/1")
+            .expect(200)
+            .then(({ body }) => {
+                const { article } = body;
+                expect(article).not.toHaveProperty('comment_count')
+                expect(article).toEqual({
+                    article_id: 1,
+                    title: 'Living in the shadow of a great man',
+                    topic: 'mitch',
+                    author: 'butter_bridge',
+                    body: 'I find this existence challenging',
+                    created_at: '2020-07-09T20:11:00.000Z',
+                    votes: 100,
+                    article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
+                })
+            })
+    });
+    test("responds with a status code: 200 and sends a single article to the client with the comment_count property if article_id is valid", () => {
+        return request(app)
+            .get("/api/articles/1?includeCommentCount=true")
+            .expect(200)
+            .then(({ body }) => {
+                const { article } = body;
+                expect(article).toHaveProperty('comment_count')
+                expect(article).toEqual({
+                    article_id: 1,
+                    title: 'Living in the shadow of a great man',
+                    topic: 'mitch',
+                    author: 'butter_bridge',
+                    body: 'I find this existence challenging',
+                    comment_count: "11",
+                    created_at: '2020-07-09T20:11:00.000Z',
+                    votes: 100,
+                    article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
+                })
+            })
+    });
+    test('responds with an appropriate status: 404 and error message when given a valid but non-existent id', () => {
+        return request(app)
+            .get('/api/articles/999?includeCommentCount=true')
+            .expect(404)
+            .then((response) => {
+                expect(response.body.msg).toBe('Article Does Not Exist');
+            });
+    });
+    test('responds with an appropriate status: 400 and error message when given an invalid id', () => {
+        return request(app)
+            .get('/api/articles/not-an-article?includeCommentCount=true')
+            .expect(400)
+            .then((response) => {
+                expect(response.body.msg).toBe('Bad Request');
+            });
+    });
+    test("responds with a status code: 400 and sends an error message when given an invalid query", () => {
+        return request(app)
+            .get("/api/articles/1?includeCommentCount=beans")
+            .expect(400)
+            .then((response) => {
+                expect(response.body.msg).toBe('Invalid Query');
             });
     });
 });
