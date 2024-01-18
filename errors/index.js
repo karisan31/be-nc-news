@@ -1,6 +1,9 @@
 exports.handleCustomErrors = (err, req, res, next) => {
-    if (err.msg) {
+    if (err.msg && err.msg.includes("Does Not Exist")) {
         res.status(404).send({ msg: err.msg })
+    }
+    else if (err.msg) {
+        res.status(400).send({ msg: err.msg })
     }
     else {
         next(err)
