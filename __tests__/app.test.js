@@ -57,7 +57,7 @@ describe("GET /api/articles/:article_id", () => {
             .expect(200)
             .then(({ body }) => {
                 const { article } = body;
-                expect(article).toEqual({
+                expect(article).toMatchObject({
                     article_id: 1,
                     title: 'Living in the shadow of a great man',
                     topic: 'mitch',
@@ -491,28 +491,9 @@ describe("GET /api/articles (topic query)", () => {
 });
 
 describe("GET /api/articles/:article_id (comment_count)", () => {
-    test("responds with a status code: 200 and sends a single article to the client without the comment_count property if article_id is valid", () => {
-        return request(app)
-            .get("/api/articles/1")
-            .expect(200)
-            .then(({ body }) => {
-                const { article } = body;
-                expect(article).not.toHaveProperty('comment_count')
-                expect(article).toEqual({
-                    article_id: 1,
-                    title: 'Living in the shadow of a great man',
-                    topic: 'mitch',
-                    author: 'butter_bridge',
-                    body: 'I find this existence challenging',
-                    created_at: '2020-07-09T20:11:00.000Z',
-                    votes: 100,
-                    article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
-                })
-            })
-    });
     test("responds with a status code: 200 and sends a single article to the client with the comment_count property if article_id is valid", () => {
         return request(app)
-            .get("/api/articles/1?includeCommentCount=true")
+            .get("/api/articles/1")
             .expect(200)
             .then(({ body }) => {
                 const { article } = body;
@@ -532,7 +513,7 @@ describe("GET /api/articles/:article_id (comment_count)", () => {
     });
     test('responds with an appropriate status: 404 and error message when given a valid but non-existent id', () => {
         return request(app)
-            .get('/api/articles/999?includeCommentCount=true')
+            .get('/api/articles/999')
             .expect(404)
             .then((response) => {
                 expect(response.body.msg).toBe('Article Does Not Exist');
@@ -540,18 +521,10 @@ describe("GET /api/articles/:article_id (comment_count)", () => {
     });
     test('responds with an appropriate status: 400 and error message when given an invalid id', () => {
         return request(app)
-            .get('/api/articles/not-an-article?includeCommentCount=true')
+            .get('/api/articles/not-an-article')
             .expect(400)
             .then((response) => {
                 expect(response.body.msg).toBe('Bad Request');
-            });
-    });
-    test("responds with a status code: 400 and sends an error message when given an invalid query", () => {
-        return request(app)
-            .get("/api/articles/1?includeCommentCount=beans")
-            .expect(400)
-            .then((response) => {
-                expect(response.body.msg).toBe('Invalid Query');
             });
     });
 });
