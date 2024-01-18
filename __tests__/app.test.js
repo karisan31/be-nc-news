@@ -264,7 +264,29 @@ describe("POST /api/articles/:article_id/comments", () => {
 });
 
 describe("PATCH /api/articles/:article_id", () => {
-    test("responds with a status code: 200 and sends a single updated article to the client if article_id is valid", () => {
+    test("responds with a status code: 200 and sends a single updated article with increased votes to the client if article_id is valid", () => {
+        const newVotes = {
+            inc_votes: 1
+        }
+        return request(app)
+            .patch("/api/articles/1")
+            .send(newVotes)
+            .expect(200)
+            .then(({ body }) => {
+                const { article } = body;
+                expect(article).toEqual({
+                    article_id: 1,
+                    title: 'Living in the shadow of a great man',
+                    topic: 'mitch',
+                    author: 'butter_bridge',
+                    body: 'I find this existence challenging',
+                    created_at: '2020-07-09T20:11:00.000Z',
+                    votes: 101,
+                    article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
+                })
+            })
+    });
+    test("responds with a status code: 200 and sends a single updated article with decreased votes to the client if article_id is valid", () => {
         const newVotes = {
             inc_votes: -100
         }
@@ -283,6 +305,28 @@ describe("PATCH /api/articles/:article_id", () => {
                     created_at: '2020-07-09T20:11:00.000Z',
                     votes: 0,
                     article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
+                })
+            })
+    });
+    test("responds with a status code: 200 and sends a single updated article with decreased votes if there is no votes property to the client if article_id is valid", () => {
+        const newVotes = {
+            inc_votes: -10
+        }
+        return request(app)
+            .patch("/api/articles/2")
+            .send(newVotes)
+            .expect(200)
+            .then(({ body }) => {
+                const { article } = body;
+                expect(article).toEqual({
+                    article_id: 2,
+                    title: "Sony Vaio; or, The Laptop",
+                    topic: "mitch",
+                    author: "icellusedkars",
+                    body: "Call me Mitchell. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would buy a laptop about a little and see the codey part of the world. It is a way I have of driving off the spleen and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people’s hats off—then, I account it high time to get to coding as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the laptop. There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the the Vaio with me.",
+                    created_at: "2020-10-16T05:03:00.000Z",
+                    votes: -10,
+                    article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
                 })
             })
     });
@@ -369,5 +413,11 @@ describe("GET /api/users", () => {
                     avatar_url: 'https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg'
                 })
             });
+    });
+});
+
+describe("GET /api/articles (topic query)", () => {
+    xtest("responds with a status code: 200 and sends all articles with the topic value specified in the query", () => {
+
     });
 });
