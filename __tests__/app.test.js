@@ -417,7 +417,65 @@ describe("GET /api/users", () => {
 });
 
 describe("GET /api/articles (topic query)", () => {
-    xtest("responds with a status code: 200 and sends all articles with the topic value specified in the query", () => {
-
+    test("responds with a status code: 200 and sends all articles with the topic value specified in the query", () => {
+        return request(app)
+            .get("/api/articles?topic=mitch")
+            .then(({ body }) => {
+                const { articles } = body;
+                expect(Array.isArray(articles)).toBe(true);
+                expect(articles.length).toBe(12)
+                articles.forEach((article) => {
+                    expect(article).toHaveProperty("topic", "mitch")
+                })
+                expect(articles[0]).toEqual({
+                    author: 'icellusedkars',
+                    title: 'Eight pug gifs that remind me of mitch',
+                    article_id: 3,
+                    topic: 'mitch',
+                    created_at: '2020-11-03T09:12:00.000Z',
+                    votes: 0,
+                    article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
+                    comment_count: '2'
+                })
+            });
+    });
+    test("responds with a status code: 200 and an empty array when given a valid but non-existent topic", () => {
+        return request(app)
+            .get("/api/articles?topic=karisan")
+            .then(({ body }) => {
+                const { articles } = body;
+                expect(Array.isArray(articles)).toBe(true);
+                expect(articles.length).toBe(0)
+            });
+    });
+    test("responds with a status code: 200 and sends all articles if query is omitted or incorrect", () => {
+        return request(app)
+            .get("/api/articles?topc=mitch")
+            .then(({ body }) => {
+                const { articles } = body;
+                expect(Array.isArray(articles)).toBe(true);
+                expect(articles.length).toBe(13)
+                articles.forEach((article) => {
+                    expect(article.hasOwnProperty('author')).toBe(true)
+                    expect(article.hasOwnProperty('title')).toBe(true)
+                    expect(article.hasOwnProperty('article_id')).toBe(true)
+                    expect(article.hasOwnProperty('topic')).toBe(true)
+                    expect(article.hasOwnProperty('created_at')).toBe(true)
+                    expect(article.hasOwnProperty('votes')).toBe(true)
+                    expect(article.hasOwnProperty('article_img_url')).toBe(true)
+                    expect(article.hasOwnProperty('comment_count')).toBe(true)
+                    expect(article.hasOwnProperty('body')).toBe(false)
+                })
+                expect(articles[0]).toEqual({
+                    author: 'icellusedkars',
+                    title: 'Eight pug gifs that remind me of mitch',
+                    article_id: 3,
+                    topic: 'mitch',
+                    created_at: '2020-11-03T09:12:00.000Z',
+                    votes: 0,
+                    article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
+                    comment_count: '2'
+                })
+            });
     });
 });
