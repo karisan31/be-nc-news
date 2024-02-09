@@ -610,4 +610,20 @@ describe("GET /api/articles (sort_by query)", () => {
         expect(articles).toBeSortedBy("comment_count", { ascending: true });
       });
   });
+  test("responds with an appropriate status: 400 and error message when given an invalid sorting query", () => {
+    return request(app)
+      .get("/api/articles?sort_by=topic")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("invalid sort_by query");
+      });
+  });
+  test("responds with an appropriate status: 400 and error message when given an invalid order query", () => {
+    return request(app)
+      .get("/api/articles?order=random")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("invalid sort_by query");
+      });
+  });
 });
